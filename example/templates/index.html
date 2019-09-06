@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Flask-SocketIO Test</title>
+    <style>
+        .progress {
+            width: 80%;
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+   <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>-->
+   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    var socket;
+    $(document).ready(function(){
+            namespace = '/test_web2';
+            socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+            socket.on('connect', function() {
+                socket.emit('web_event', {data: 'I\'m connected from the web!'});
+            });
+
+            socket.on('web_response', function(msg) {
+                $('#conn_status').append('<br>' + $('<div/>').text('Received #' + ': ' + msg.data).html());
+            });
+            socket.on('web_response1', function(msg) {
+                $('#response1').append('<br>' + $('<div/>').text('Received #' + ': ' + msg.data).html());
+            });
+             socket.on('web_response2', function(msg) {
+                $('#response2').append('<br>' + $('<div/>').text('Received #' + ': ' + msg.data).html());
+            });
+
+        //}; //end of namespace*/
+        });//end of document.ready function
+
+        $(window).on('beforeunload', function(){ 
+            socket.emit('disconnect_request');
+        });
+        function Echo2Local() {
+            $.ajax({
+                type: 'POST',
+                url: '/web2local',
+                data: JSON.stringify({'message': $('#emit2local_data').val()}),
+                contentType: 'application/json',
+                error: function (request, status, error) {
+                    console.log(arguments);
+                    alert(" Can't do because: " + error);
+                    alert(status);
+                },
+                success: function (response) {
+                    console.log(response['result']);
+                }
+            });
+
+        };
+        function startBPTask1() {
+            $("#response1").text('Please wait...');
+            $.ajax({
+            type: 'GET',
+            url: '/SendTallyFunc/',
+
+            success: function(response){
+                //alert(response);
+                $("#response1").html('response' + ':'+response);
+            },
+            error: function(response) {
+                //alert(response);
+                $("#response1").html('Error connecting from the web.<br>'+response);
+            }
+    });//end ajax
+};//end DashboardBtnClick
+        function startBPTask2() {
+            $("#response2").text('Please wait...');
+
+            $.ajax({
+            type: 'GET',
+            url: '/SendTallyFunc2/',
+
+            success: function(response){
+                //alert(response);
+                $("#response2").html('response' + ':'+response);
+            },
+            error: function(response) {
+                //alert(response);
+                $("#response2").html('Error connecting from the web.<br>'+response);
+            }
+    });//end ajax
+};//end DashboardBtnClick
+
+</script>
+</head>
+<body>
+    <h1>Flask-SocketIO Blueprint Test</h1>
+    <p>Async mode is: <b>{{ async_mode }}</b></p>
+    <div id="conn_status"></div>
+    <h2>Send:</h2>
+    <button id="start-bg-job-blueprint" onclick="startBPTask1()">Start Celery Task from BPTEST1</button><br><br>
+
+    <button id="start-bg-job-blueprint2" onclick="startBPTask2()">Start Celery Task from BPTEST2</button><br><br>
+    <h2>Receive:</h2>
+    <div id="response1"></div>
+    <div id="response2"></div>
+    <br>
+
+</body>
+</html>
