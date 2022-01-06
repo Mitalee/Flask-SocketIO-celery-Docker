@@ -1,6 +1,6 @@
 amqp==2.3.2
 billiard==3.5.0.4
-celery==4.2.1
+celery==5.2.2
 Click==7.0
 dnspython==1.15.0
 eventlet==0.24.1
